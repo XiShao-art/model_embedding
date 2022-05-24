@@ -18,7 +18,7 @@ import pandas as pd
     '--data-file', '-df', default='data/data-train/gallen_norm_mod.owl',
     help='Normalized ontology file (Normalizer.groovy)')
 @ck.option(
-    '--out-classes-file', '-ocf', default='data/classPPIEmbed.pkl',
+    '--out-classes-file', '-ocf', default='data/classPPIEmbed5.pkl',
     help='Pandas pkl file with class embeddings')
 @ck.option(
     '--out-relations-file', '-orf', default='data/relationPPIEmbed.pkl',

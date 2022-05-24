@@ -105,8 +105,6 @@ def load_data(filename):
     n_classes = len(classes)
     data['nf3_neg'] = []
     for c, r, d in data['nf3']:
-        # if r != inter_ind:
-        #     continue
         data['nf3_neg'].append((c, r, np.random.choice(prot_ids)))
         data['nf3_neg'].append((np.random.choice(prot_ids), r, d))
 

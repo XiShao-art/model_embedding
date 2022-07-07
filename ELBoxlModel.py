@@ -15,6 +15,7 @@ class ELBoxModel(nn.Module):
 
     def __init__(self, device, class_, relationNum, embedding_dim, batch,margin1=0):
         super(ELBoxModel, self).__init__()
+        initiallizer = [nn.init.uniform_]
 
         self.margin1 = margin1
         self.margin=0
@@ -26,11 +27,11 @@ class ELBoxModel(nn.Module):
         self.inf=4
 
         self.classEmbeddingDict = nn.Embedding(self.classNum, embedding_dim*2)
-        nn.init.uniform_(self.classEmbeddingDict.weight,a=-2,b=2)
+        nn.init.xavier_normal_(self.classEmbeddingDict.weight)
         self.classEmbeddingDict.weight.data /= torch.linalg.norm(self.classEmbeddingDict.weight.data,axis=1).reshape(-1,1)
 
         self.relationEmbeddingDict = nn.Embedding(relationNum, embedding_dim)
-        nn.init.uniform_(self.relationEmbeddingDict.weight,a=-2,b=2)
+        nn.init.xavier_normal_(self.relationEmbeddingDict.weight)
         self.relationEmbeddingDict.weight.data /= torch.linalg.norm(
             self.relationEmbeddingDict.weight.data, axis=1).reshape(-1, 1)
 

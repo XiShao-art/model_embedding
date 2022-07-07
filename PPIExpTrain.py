@@ -4,7 +4,7 @@ import torch.optim as optim
 
 
 from ELBoxlModel import  ELBoxModel
-from utils.elDataLoader import load_data, load_valid_data
+from utils.elDataLoader import load_data2, load_data
 import logging
 import torch
 logging.basicConfig(level=logging.INFO)
@@ -15,7 +15,7 @@ import pandas as pd
 #family_normalized.owl
 #yeast-classes-normalized.owl
 @ck.option(
-    '--data-file', '-df', default='data/data-train/gallen_norm_mod.owl',
+    '--data-file', '-df', default='data/data-train/yeast-classes-normalized.owl',
     help='Normalized ontology file (Normalizer.groovy)')
 @ck.option(
     '--out-classes-file', '-ocf', default='data/classPPIEmbed5.pkl',
@@ -26,37 +26,46 @@ import pandas as pd
 @ck.option(
     '--batch-size', '-bs', default=512,
     help='Batch size')
+@ck.option(
+    '--model_num', '-mn', default=7,
+    help='model num')
 
 
 def main(data_file, out_classes_file, out_relations_file,
-         batch_size):
+         batch_size,model_num):
 
     device = torch.device('cpu')
-
+    PPI_task = True
     #training procedure
-    train_data, classes, relations = load_data(data_file)
-    print(len(relations))
-    embedding_dim = 50
-    model = ELBoxModel(device,classes, len(relations), embedding_dim=embedding_dim, batch = batch_size,margin1=-0.05)
+    if PPI_task:
+        train_data, classes, relations = load_data2(data_file)
+    else:
+        train_data, classes, relations = load_data(data_file)
 
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    model = model.to(device)
-    train(model,train_data, optimizer)
-    model.eval()
 
-   # model = model.to('cuda:0')
-    cls_file = out_classes_file
-    df = pd.DataFrame(
-        {'classes': list(classes.keys()),
-         'embeddings': list(model.classEmbeddingDict.weight.clone().detach().cpu().numpy())})
-    df.to_pickle(cls_file)
+    for i in range(model_num):
+        print('model'+str(i)+'#####################')
+        embedding_dim = 50
+        model = ELBoxModel(device,classes, len(relations), embedding_dim=embedding_dim, batch = batch_size,margin1=-0.05)
 
-    rel_file = out_relations_file
-    df = pd.DataFrame(
-        {'relations': list(relations.keys()),
-         'embeddings': list(model.relationEmbeddingDict.weight.clone().detach().cpu().numpy())})
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        model = model.to(device)
+        train(model,train_data, optimizer)
+        model.eval()
 
-    df.to_pickle(rel_file)
+       # model = model.to('cuda:0')
+        cls_file = 'data/classPPIEmbed'+str(i)+'.pkl'
+        df = pd.DataFrame(
+            {'classes': list(classes.keys()),
+             'embeddings': list(model.classEmbeddingDict.weight.clone().detach().cpu().numpy())})
+        df.to_pickle(cls_file)
+
+        rel_file = 'data/relationPPIEmbed'+str(i)+'.pkl'
+        df = pd.DataFrame(
+            {'relations': list(relations.keys()),
+             'embeddings': list(model.relationEmbeddingDict.weight.clone().detach().cpu().numpy())})
+
+        df.to_pickle(rel_file)
 
 def train(model, data, optimizer, num_epochs=8001):
     model.train()
@@ -65,7 +74,7 @@ def train(model, data, optimizer, num_epochs=8001):
         re = model(data)
         loss = sum(re)
         if epoch%100==0:
-            print("epoch:",epoch,'loss:',loss.item())
+            print("epoch:",epoch,'loss:',loss.item(), flush=True)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()

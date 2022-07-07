@@ -5,7 +5,7 @@ np.random.seed(seed=100)
 
 '''load the normalized data(nf1, nf2, nf3, nf4)
 
-Args: 
+Args:  
     filename: the normalized data, .owl format
 
 Return:
@@ -248,11 +248,11 @@ def load_data2(filename):
 
         data['nf3_neg'].append((np.random.choice(prot_ids), r, d))
 
-    for i in data['nf2'][10000:]:
-        a,b,c = i
-        print(str(a)+" "+str(b)+" "+str(c))
-        data['nf1'].append((c,a))
-        data['nf1'].append((c, b))
+    # for i in data['nf2'][10000:]:
+    #     a,b,c = i
+    #     print(str(a)+" "+str(b)+" "+str(c))
+    #     data['nf1'].append((c,a))
+    #     data['nf1'].append((c, b))
     data['nf1'] = torch.tensor(data['nf1'], dtype=torch.int32)
     data['nf2'] = torch.tensor(data['nf2'], dtype=torch.int32)
     data['nf3'] = torch.tensor(data['nf3'], dtype=torch.int32)

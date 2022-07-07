@@ -25,52 +25,36 @@ epoch = '6000'
 @ck.option(
     '--rel-embeds-file', '-ref', default='data/relationPPIEmbed.pkl',
     help='Relation embedings file')
+@ck.option(
+    '--model_num', '-mn', default=100,
+    help='model num')
 
 def main(  test_data_file,
-    cls_embeds_file, rel_embeds_file):
+    cls_embeds_file, rel_embeds_file,model_num):
     #embedding_size = 50
+    cls_df_list = []
+    classes_list = []
 
-    cls_df0 = pd.read_pickle('data/classPPIEmbed0.pkl')
-    cls_df1 = pd.read_pickle('data/classPPIEmbed1.pkl')
-    cls_df2 = pd.read_pickle('data/classPPIEmbed2.pkl')
-    cls_df3 = pd.read_pickle('data/classPPIEmbed3.pkl')
-    cls_df4 = pd.read_pickle('data/classPPIEmbed4.pkl')
-    cls_df5 = pd.read_pickle('data/classPPIEmbed5.pkl')
-
-    embeds_list0 = cls_df0['embeddings'].values
-    embeds_list1 = cls_df1['embeddings'].values
-    embeds_list2 = cls_df2['embeddings'].values
-    embeds_list3 = cls_df3['embeddings'].values
-    embeds_list4 = cls_df4['embeddings'].values
-    embeds_list5 = cls_df5['embeddings'].values
-
-    classes0 = {v: k for k, v in enumerate(cls_df0['classes'])}
-    classes1 = {v: k for k, v in enumerate(cls_df1['classes'])}
-    classes2 = {v: k for k, v in enumerate(cls_df2['classes'])}
-    classes3 = {v: k for k, v in enumerate(cls_df3['classes'])}
-    classes4 = {v: k for k, v in enumerate(cls_df4['classes'])}
-    classes5 = {v: k for k, v in enumerate(cls_df5['classes'])}
+    thr = 0.9
+    for i in range(0,model_num):
+        cls_df_list.append(pd.read_pickle('data/classPPIEmbed'+str(i)+'.pkl'))
+        classes_list.append({v: k for k, v in enumerate(cls_df_list[i]['classes'])})
 
     test_data = load_data(test_data_file)
 
     positive = 0
     total = len(test_data)
     random.seed(123)
+
     for pair in test_data:
-        c, d =pair
-        classes_num = len(classes0)-1
-        dst0 = return_dst(embeds_list0,classes0,c,d)
-        dst1 = return_dst(embeds_list1, classes1, c, d)
-        dst2 = return_dst(embeds_list2, classes2, c, d)
-        dst3 = return_dst(embeds_list3, classes3, c, d)
-        dst4 = return_dst(embeds_list4, classes4, c, d)
-        dst5 = return_dst(embeds_list5, classes5, c, d)
         dst = 0
-        thr = 0.9
-        if dst0>thr or dst1>thr or dst2>thr or dst3>thr or dst4>thr or dst5>thr:
-            dst = 1
+        c, d =pair
+        for i in range(0, model_num):
 
-
+            dst0 = return_dst(cls_df_list[i]['embeddings'].values,classes_list[i],c,d)
+            if dst0 > thr :
+                dst = 1
+                break
         # c = np.array(embeds_list[ random.randint(0,classes_num)])
         # d = np.array(embeds_list[ random.randint(0,classes_num)])
 
